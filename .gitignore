@@ -1,0 +1,10 @@
+# OS / editor
+.DS_Store
+*.log
+
+# Node
+node_modules/
+frontend/dist/
+
+# Java / Maven
+backend/target/
