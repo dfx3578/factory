@@ -46,6 +46,8 @@ export interface Field {
 
 interface ResourcePageProps<T> {
   title: string
+  /** Label used in the "Add …" affordances; defaults to the de-pluralised title. */
+  singular?: string
   description: string
   endpoint: string
   columns: Column<T>[]
@@ -55,6 +57,7 @@ interface ResourcePageProps<T> {
 
 export function ResourcePage<T extends { id: number }>({
   title,
+  singular,
   description,
   endpoint,
   columns,
@@ -69,6 +72,7 @@ export function ResourcePage<T extends { id: number }>({
   const [saving, setSaving] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
 
+  const label = singular ?? title.replace(/s$/, '')
   const emptyForm = useMemo(() => defaults, [defaults])
   const reload = () => {
     setLoading(true)
@@ -129,12 +133,12 @@ export function ResourcePage<T extends { id: number }>({
         <Dialog open={open} onOpenChange={(value) => { setOpen(value); if (value) setForm(emptyForm) }}>
           <DialogTrigger asChild>
             <Button>
-              <Plus className="h-4 w-4" /> Add {title.replace(/s$/, '')}
+              <Plus className="h-4 w-4" /> Add {label}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add {title.replace(/s$/, '')}</DialogTitle>
+              <DialogTitle>Add {label}</DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-2">
               {fields.map((field) => (
