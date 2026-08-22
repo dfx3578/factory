@@ -1,0 +1,17 @@
+{
+  "name": "e2e",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "typecheck": "tsc -p tsconfig.json",
+    "test:ui": "playwright test --ui",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.1",
+    "@types/node": "^22.15.0",
+    "typescript": "~5.7.2"
+  }
+}

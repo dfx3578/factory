@@ -34,6 +34,7 @@ export function Companies() {
   return (
     <ResourcePage<Company>
       title="Companies"
+      singular="Company"
       description="Accounts and organizations you work with"
       endpoint="/companies"
       columns={columns}
