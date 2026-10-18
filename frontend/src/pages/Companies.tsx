@@ -1,5 +1,6 @@
 import { ResourcePage } from '@/components/ResourcePage'
 import type { Column, Field } from '@/components/ResourcePage'
+import { companies } from '@/data/companies'
 import type { Company } from '@/types'
 
 const columns: Column<Company>[] = [
@@ -11,7 +12,7 @@ const columns: Column<Company>[] = [
 ]
 
 const fields: Field[] = [
-  { name: 'name', label: 'Name', placeholder: 'Acme Corp' },
+  { name: 'name', label: 'Name', placeholder: 'Acme Corp', required: true },
   {
     name: 'industry',
     label: 'Industry',
@@ -35,7 +36,7 @@ export function Companies() {
     <ResourcePage<Company>
       title="Companies"
       description="Accounts and organizations you work with"
-      endpoint="/companies"
+      initialData={companies}
       columns={columns}
       fields={fields}
       defaults={defaults}

@@ -42,12 +42,21 @@ export interface Field {
   type?: 'text' | 'number' | 'email' | 'date'
   options?: string[]
   placeholder?: string
+  required?: boolean
+}
+
+function singularize(title: string): string {
+  if (title.endsWith('ies')) return `${title.slice(0, -3)}y`
+  return title.replace(/s$/, '')
 }
 
 interface ResourcePageProps<T> {
   title: string
   description: string
-  endpoint: string
+  /** REST endpoint to fetch/create/delete against. Omit to keep data
+   * client-side from `initialData` (frontend-only mode). */
+  endpoint?: string
+  initialData?: T[]
   columns: Column<T>[]
   fields: Field[]
   defaults: Record<string, string>
@@ -57,12 +66,13 @@ export function ResourcePage<T extends { id: number }>({
   title,
   description,
   endpoint,
+  initialData,
   columns,
   fields,
   defaults,
 }: ResourcePageProps<T>) {
-  const [items, setItems] = useState<T[]>([])
-  const [loading, setLoading] = useState(true)
+  const [items, setItems] = useState<T[]>(initialData ?? [])
+  const [loading, setLoading] = useState(Boolean(endpoint))
   const [error, setError] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
   const [form, setForm] = useState<Record<string, string>>(defaults)
@@ -76,6 +86,7 @@ export function ResourcePage<T extends { id: number }>({
   }
 
   useEffect(() => {
+    if (!endpoint) return
     let active = true
     api
       .get<T[]>(endpoint)
@@ -94,15 +105,32 @@ export function ResourcePage<T extends { id: number }>({
   async function handleCreate() {
     setSaving(true)
     try {
+      const missing = fields.find((field) => field.required && !(form[field.name] ?? '').trim())
+      if (missing) {
+        setError(`${missing.label} is required`)
+        return
+      }
       const payload: Record<string, unknown> = {}
       for (const field of fields) {
         const raw = form[field.name] ?? ''
         payload[field.name] = field.type === 'number' ? Number(raw || 0) : raw
       }
-      await api.post(endpoint, payload)
+      if (endpoint) {
+        await api.post(endpoint, payload)
+        reload()
+      } else {
+        setItems((prev) => [
+          ...prev,
+          {
+            ...payload,
+            id: prev.reduce((max, item) => Math.max(max, item.id), 0) + 1,
+            createdAt: new Date().toISOString().slice(0, 10),
+          } as unknown as T,
+        ])
+      }
       setOpen(false)
       setForm(emptyForm)
-      reload()
+      setError(null)
     } catch (err) {
       setError((err as Error).message)
     } finally {
@@ -112,8 +140,12 @@ export function ResourcePage<T extends { id: number }>({
 
   async function handleDelete(id: number) {
     try {
-      await api.del(`${endpoint}/${id}`)
-      reload()
+      if (endpoint) {
+        await api.del(`${endpoint}/${id}`)
+        reload()
+      } else {
+        setItems((prev) => prev.filter((item) => item.id !== id))
+      }
     } catch (err) {
       setError((err as Error).message)
     }
@@ -126,20 +158,23 @@ export function ResourcePage<T extends { id: number }>({
           <h2 className="text-3xl font-bold tracking-tight">{title}</h2>
           <p className="mt-1 text-muted-foreground">{description}</p>
         </div>
-        <Dialog open={open} onOpenChange={(value) => { setOpen(value); if (value) setForm(emptyForm) }}>
+        <Dialog open={open} onOpenChange={(value) => { setOpen(value); if (value) { setForm(emptyForm); setError(null) } }}>
           <DialogTrigger asChild>
             <Button>
-              <Plus className="h-4 w-4" /> Add {title.replace(/s$/, '')}
+              <Plus className="h-4 w-4" /> Add {singularize(title)}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add {title.replace(/s$/, '')}</DialogTitle>
+              <DialogTitle>Add {singularize(title)}</DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-2">
               {fields.map((field) => (
                 <div key={field.name} className="grid gap-2">
-                  <Label htmlFor={field.name}>{field.label}</Label>
+                  <Label htmlFor={field.name}>
+                    {field.label}
+                    {field.required && <span className="text-destructive"> *</span>}
+                  </Label>
                   {field.options ? (
                     <Select
                       value={form[field.name] ?? ''}
@@ -161,6 +196,7 @@ export function ResourcePage<T extends { id: number }>({
                       id={field.name}
                       type={field.type ?? 'text'}
                       placeholder={field.placeholder}
+                      required={field.required}
                       value={form[field.name] ?? ''}
                       onChange={(e) => setForm((f) => ({ ...f, [field.name]: e.target.value }))}
                     />
@@ -168,6 +204,7 @@ export function ResourcePage<T extends { id: number }>({
                 </div>
               ))}
             </div>
+            {error && <p className="text-sm text-destructive">{error}</p>}
             <DialogFooter>
               <Button variant="outline" onClick={() => setOpen(false)}>
                 Cancel
