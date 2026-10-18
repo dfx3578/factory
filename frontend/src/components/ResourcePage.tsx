@@ -42,6 +42,12 @@ export interface Field {
   type?: 'text' | 'number' | 'email' | 'date'
   options?: string[]
   placeholder?: string
+  required?: boolean
+}
+
+function singularize(title: string): string {
+  if (title.endsWith('ies')) return `${title.slice(0, -3)}y`
+  return title.replace(/s$/, '')
 }
 
 interface ResourcePageProps<T> {
@@ -99,6 +105,11 @@ export function ResourcePage<T extends { id: number }>({
   async function handleCreate() {
     setSaving(true)
     try {
+      const missing = fields.find((field) => field.required && !(form[field.name] ?? '').trim())
+      if (missing) {
+        setError(`${missing.label} is required`)
+        return
+      }
       const payload: Record<string, unknown> = {}
       for (const field of fields) {
         const raw = form[field.name] ?? ''
@@ -119,6 +130,7 @@ export function ResourcePage<T extends { id: number }>({
       }
       setOpen(false)
       setForm(emptyForm)
+      setError(null)
     } catch (err) {
       setError((err as Error).message)
     } finally {
@@ -146,20 +158,23 @@ export function ResourcePage<T extends { id: number }>({
           <h2 className="text-3xl font-bold tracking-tight">{title}</h2>
           <p className="mt-1 text-muted-foreground">{description}</p>
         </div>
-        <Dialog open={open} onOpenChange={(value) => { setOpen(value); if (value) setForm(emptyForm) }}>
+        <Dialog open={open} onOpenChange={(value) => { setOpen(value); if (value) { setForm(emptyForm); setError(null) } }}>
           <DialogTrigger asChild>
             <Button>
-              <Plus className="h-4 w-4" /> Add {title.replace(/s$/, '')}
+              <Plus className="h-4 w-4" /> Add {singularize(title)}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add {title.replace(/s$/, '')}</DialogTitle>
+              <DialogTitle>Add {singularize(title)}</DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-2">
               {fields.map((field) => (
                 <div key={field.name} className="grid gap-2">
-                  <Label htmlFor={field.name}>{field.label}</Label>
+                  <Label htmlFor={field.name}>
+                    {field.label}
+                    {field.required && <span className="text-destructive"> *</span>}
+                  </Label>
                   {field.options ? (
                     <Select
                       value={form[field.name] ?? ''}
@@ -181,6 +196,7 @@ export function ResourcePage<T extends { id: number }>({
                       id={field.name}
                       type={field.type ?? 'text'}
                       placeholder={field.placeholder}
+                      required={field.required}
                       value={form[field.name] ?? ''}
                       onChange={(e) => setForm((f) => ({ ...f, [field.name]: e.target.value }))}
                     />
@@ -188,6 +204,7 @@ export function ResourcePage<T extends { id: number }>({
                 </div>
               ))}
             </div>
+            {error && <p className="text-sm text-destructive">{error}</p>}
             <DialogFooter>
               <Button variant="outline" onClick={() => setOpen(false)}>
                 Cancel

@@ -12,7 +12,7 @@ const columns: Column<Company>[] = [
 ]
 
 const fields: Field[] = [
-  { name: 'name', label: 'Name', placeholder: 'Acme Corp' },
+  { name: 'name', label: 'Name', placeholder: 'Acme Corp', required: true },
   {
     name: 'industry',
     label: 'Industry',
