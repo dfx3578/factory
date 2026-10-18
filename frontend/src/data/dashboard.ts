@@ -1,0 +1,115 @@
+import type { DashboardData } from '@/types'
+
+// Frontend-only dataset for the dashboard. Mirrors the shape the backend
+// `/api/dashboard` endpoint returns, plus the chart series the backend
+// does not provide (monthly revenue, pipeline breakdown).
+export const dashboardData: DashboardData = {
+  stats: {
+    totalContacts: 220,
+    contactsChange: '+12% from last month',
+    companies: 53,
+    companiesChange: '+8% from last month',
+    activeDeals: 89,
+    dealsChange: '-2% from last month',
+    revenue: '$2.4M',
+    revenueChange: '+25% from last month',
+  },
+  monthlyRevenue: [
+    { month: 'Jan', revenue: 118000, deals: 6 },
+    { month: 'Feb', revenue: 142000, deals: 8 },
+    { month: 'Mar', revenue: 129000, deals: 7 },
+    { month: 'Apr', revenue: 176000, deals: 9 },
+    { month: 'May', revenue: 158000, deals: 8 },
+    { month: 'Jun', revenue: 214000, deals: 11 },
+    { month: 'Jul', revenue: 236000, deals: 12 },
+    { month: 'Aug', revenue: 201000, deals: 10 },
+    { month: 'Sep', revenue: 248000, deals: 13 },
+    { month: 'Oct', revenue: 264000, deals: 14 },
+    { month: 'Nov', revenue: 231000, deals: 11 },
+    { month: 'Dec', revenue: 283000, deals: 15 },
+  ],
+  // Matches the 89 open deals in backend DataSeeder.seedDeals:
+  // value = 5000 + i*750 for i in 0..88, stage = STAGES[i % 4].
+  pipeline: [
+    { stage: 'Discovery', count: 23, value: 874000 },
+    { stage: 'Qualified', count: 22, value: 852500 },
+    { stage: 'Proposal', count: 22, value: 819500 },
+    { stage: 'Negotiation', count: 22, value: 836000 },
+  ],
+  recentActivity: [
+    { id: 3, type: 'Call', description: 'Called John Doe', date: '2025-07-08' },
+    { id: 2, type: 'Email', description: 'Replied to quote request', date: '2025-07-07' },
+    { id: 1, type: 'Meeting', description: 'Demo scheduled', date: '2025-07-06' },
+  ],
+  performance: [
+    { fullName: 'Alice Jordan', closedDeals: 6, revenue: 75000 },
+    { fullName: 'Julia Brown', closedDeals: 5, revenue: 60000 },
+    { fullName: 'Jane Smith', closedDeals: 3, revenue: 34000 },
+  ],
+  recentContacts: [
+    {
+      id: 220,
+      fullName: 'Jane Smith',
+      email: 'jane.smith@acme.com',
+      phone: '+1 555 0100',
+      company: 'Acme Corp',
+      source: 'Website',
+      owner: 'Sarah',
+      createdAt: '2025-07-08',
+    },
+    {
+      id: 219,
+      fullName: 'Mike Jordan',
+      email: 'mike.jordan@freelance.io',
+      phone: '+1 555 0101',
+      company: 'Freelance',
+      source: 'LinkedIn',
+      owner: 'Daniel',
+      createdAt: '2025-07-07',
+    },
+    {
+      id: 218,
+      fullName: 'Julia Brown',
+      email: 'julia.brown@freelance.io',
+      phone: '+1 555 0102',
+      company: 'Freelance',
+      source: 'LinkedIn',
+      owner: 'Alex',
+      createdAt: '2025-07-07',
+    },
+  ],
+  upcomingTasks: [
+    {
+      id: 1,
+      type: 'Call client',
+      relatedTo: '"CRM Redesign"',
+      assignedTo: 'Sarah',
+      status: 'Pending',
+      dueDate: '2025-07-10',
+    },
+    {
+      id: 2,
+      type: 'Prepare quote',
+      relatedTo: 'Acme Inc.',
+      assignedTo: 'Daniel',
+      status: 'In Progress',
+      dueDate: '2025-07-11',
+    },
+    {
+      id: 4,
+      type: 'Send proposal',
+      relatedTo: 'Globex',
+      assignedTo: 'Alex',
+      status: 'Pending',
+      dueDate: '2025-07-12',
+    },
+    {
+      id: 5,
+      type: 'Follow up',
+      relatedTo: 'Initech',
+      assignedTo: 'Emma',
+      status: 'In Progress',
+      dueDate: '2025-07-13',
+    },
+  ],
+}

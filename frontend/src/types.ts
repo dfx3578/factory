@@ -70,3 +70,20 @@ export interface DashboardResponse {
   recentContacts: Contact[]
   upcomingTasks: Task[]
 }
+
+export interface MonthlyRevenue {
+  month: string
+  revenue: number
+  deals: number
+}
+
+export interface PipelineStage {
+  stage: string
+  count: number
+  value: number
+}
+
+export interface DashboardData extends DashboardResponse {
+  monthlyRevenue: MonthlyRevenue[]
+  pipeline: PipelineStage[]
+}
