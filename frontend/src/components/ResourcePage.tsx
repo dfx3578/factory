@@ -47,7 +47,10 @@ export interface Field {
 interface ResourcePageProps<T> {
   title: string
   description: string
-  endpoint: string
+  /** REST endpoint to fetch/create/delete against. Omit to keep data
+   * client-side from `initialData` (frontend-only mode). */
+  endpoint?: string
+  initialData?: T[]
   columns: Column<T>[]
   fields: Field[]
   defaults: Record<string, string>
@@ -57,12 +60,13 @@ export function ResourcePage<T extends { id: number }>({
   title,
   description,
   endpoint,
+  initialData,
   columns,
   fields,
   defaults,
 }: ResourcePageProps<T>) {
-  const [items, setItems] = useState<T[]>([])
-  const [loading, setLoading] = useState(true)
+  const [items, setItems] = useState<T[]>(initialData ?? [])
+  const [loading, setLoading] = useState(Boolean(endpoint))
   const [error, setError] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
   const [form, setForm] = useState<Record<string, string>>(defaults)
@@ -76,6 +80,7 @@ export function ResourcePage<T extends { id: number }>({
   }
 
   useEffect(() => {
+    if (!endpoint) return
     let active = true
     api
       .get<T[]>(endpoint)
@@ -99,10 +104,21 @@ export function ResourcePage<T extends { id: number }>({
         const raw = form[field.name] ?? ''
         payload[field.name] = field.type === 'number' ? Number(raw || 0) : raw
       }
-      await api.post(endpoint, payload)
+      if (endpoint) {
+        await api.post(endpoint, payload)
+        reload()
+      } else {
+        setItems((prev) => [
+          ...prev,
+          {
+            ...payload,
+            id: prev.reduce((max, item) => Math.max(max, item.id), 0) + 1,
+            createdAt: new Date().toISOString().slice(0, 10),
+          } as unknown as T,
+        ])
+      }
       setOpen(false)
       setForm(emptyForm)
-      reload()
     } catch (err) {
       setError((err as Error).message)
     } finally {
@@ -112,8 +128,12 @@ export function ResourcePage<T extends { id: number }>({
 
   async function handleDelete(id: number) {
     try {
-      await api.del(`${endpoint}/${id}`)
-      reload()
+      if (endpoint) {
+        await api.del(`${endpoint}/${id}`)
+        reload()
+      } else {
+        setItems((prev) => prev.filter((item) => item.id !== id))
+      }
     } catch (err) {
       setError((err as Error).message)
     }

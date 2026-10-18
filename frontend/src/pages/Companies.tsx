@@ -1,5 +1,6 @@
 import { ResourcePage } from '@/components/ResourcePage'
 import type { Column, Field } from '@/components/ResourcePage'
+import { companies } from '@/data/companies'
 import type { Company } from '@/types'
 
 const columns: Column<Company>[] = [
@@ -35,7 +36,7 @@ export function Companies() {
     <ResourcePage<Company>
       title="Companies"
       description="Accounts and organizations you work with"
-      endpoint="/companies"
+      initialData={companies}
       columns={columns}
       fields={fields}
       defaults={defaults}
