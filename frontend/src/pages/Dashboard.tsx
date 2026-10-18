@@ -63,7 +63,7 @@ export function Dashboard() {
           </p>
         </div>
         <Badge variant="secondary" className="mt-2 px-3 py-1 text-xs">
-          Last 12 months
+          2025
         </Badge>
       </div>
 

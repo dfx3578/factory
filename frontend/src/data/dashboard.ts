@@ -28,11 +28,13 @@ export const dashboardData: DashboardData = {
     { month: 'Nov', revenue: 231000, deals: 11 },
     { month: 'Dec', revenue: 283000, deals: 15 },
   ],
+  // Matches the 89 open deals in backend DataSeeder.seedDeals:
+  // value = 5000 + i*750 for i in 0..88, stage = STAGES[i % 4].
   pipeline: [
-    { stage: 'Qualified', count: 23, value: 486000 },
-    { stage: 'Discovery', count: 22, value: 402000 },
-    { stage: 'Proposal', count: 22, value: 591000 },
-    { stage: 'Negotiation', count: 22, value: 764000 },
+    { stage: 'Discovery', count: 23, value: 874000 },
+    { stage: 'Qualified', count: 22, value: 852500 },
+    { stage: 'Proposal', count: 22, value: 819500 },
+    { stage: 'Negotiation', count: 22, value: 836000 },
   ],
   recentActivity: [
     { id: 3, type: 'Call', description: 'Called John Doe', date: '2025-07-08' },
